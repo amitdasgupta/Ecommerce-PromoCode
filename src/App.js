@@ -7,6 +7,7 @@ import Estimated from "./components/estimated/estimated";
 import Item from "./components/ItemDetail/itemdetail";
 import Promo from "./components/promocode/promocode";
 import "./App.css";
+import { connect } from "react-redux";
 
 class App extends Component {
   constructor(props) {
@@ -32,11 +33,20 @@ class App extends Component {
       }
     );
   }
-  handleDisabled = e => {
-    this.setState({
-      disableformbutton: this.state.disableformbutton
-    });
+  giveDiscountHandler = () => {
+    console.log("called");
+    if (this.props.promoCode === "DISCOUNT") {
+      this.setState(
+        { estimatedTotal: this.state.estimatedTotal * 0.9 },
+        function() {
+          this.setState({
+            disableformbutton: true
+          });
+        }
+      );
+    }
   };
+
   render() {
     const {
       total,
@@ -48,23 +58,27 @@ class App extends Component {
     return (
       <div className="container">
         <Grid className="purchase-card">
-          <h1>Hello world</h1>
           <Subtotal price={total.toFixed(2)} />
           <Pickup price={pickupSavings.toFixed(2)} />
           <Taxes taxes={taxes.toFixed(2)} />
           <hr />
           <Estimated price={estimatedTotal.toFixed(2)} />
-          <Item
-            price={estimatedTotal.toFixed(2)}
-            isDisabled={disableformbutton}
-            handleChange={this.handleDisabled}
-          />
+          <Item price={estimatedTotal.toFixed(2)} />
           <hr />
-          <Promo />
+          <Promo
+            isDisabled={disableformbutton}
+            giveDiscount={this.giveDiscountHandler}
+          />
         </Grid>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    promoCode: state.promoCode.value
+  };
+};
+
+export default connect(mapStateToProps)(App);
